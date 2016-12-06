@@ -1,4 +1,4 @@
-# jsmpeg
+# jsmpeg with socket.io support
 
 #### An MPEG1 Video Decoder in JavaScript ####
 
@@ -7,6 +7,7 @@ emscripten or similar. This will probably make it obsolete with the advent of as
 
 Some demos and more info: [phoboslab.org/log/2013/05/mpeg1-video-decoder-in-javascript](http://www.phoboslab.org/log/2013/05/mpeg1-video-decoder-in-javascript)
 
+This is a forked version which enables socket.io in addition to the native WebSocket implementation
 
 ## API ##
 
@@ -16,6 +17,7 @@ Some demos and more info: [phoboslab.org/log/2013/05/mpeg1-video-decoder-in-java
 `var player = new jsmpeg(file [, options])`
 
 The `file` argument accepts a URL to a .mpg file or a (yet unconnected) WebSocket instance for streaming playback.
+In addition a `socketIO` string can be passed, to enable the decoding via socket.io
 
 The `options` argument to the `jsmpeg()` supports the following properties:
 
@@ -28,6 +30,8 @@ The `options` argument to the `jsmpeg()` supports the following properties:
 - `onload` a function that's called once, after the .mpg file has been completely loaded
 - `ondecodeframe` a function that's called after every frame that's decoded and rendered to the canvas
 - `onfinished` a function that's called when playback ends
+- `width` defines the width of the decoded data (for socket.io)
+- `height` defines the height of the decoded data (for socket.io)
 
 
 ### Methods ###
@@ -38,6 +42,7 @@ The `options` argument to the `jsmpeg()` supports the following properties:
 - `seekToFrame(frame)` seek to the specified frame (Number)
 - `seekToTime(seconds)` seek to the specified time (Number)
 - `nextFrame()` if playback is paused, decode and render the next frame; returns then HTML Canvas element
+- `decode(arrayBuffer)` takes an arrayBuffer and decodes it (for data received from socket.io)
 
 When live streaming, jsmpeg supports the following methods for recording the stream clientside
 - `canRecord()` returns `true` when streaming has started and recording can begin, `false` otherwise
@@ -112,6 +117,24 @@ To configure jsmpeg to connect to the stream server, simply pass a WebSocket con
 // Setup the WebSocket connection and start the player
 var client = new WebSocket( 'ws://example.com:8084/' );
 var player = new jsmpeg(client, {canvas:canvas});
+```
+
+### Live Streaming with socket.io ###
+
+this fork of jsmpeg supports streaming live video through socket.io. You can use ffmpeg and a nodejs server to serve the MPEG video.
+
+To configure jsmpeg to connect to the stream server, simply pass a the `socketIO` string instead of a filename to the constructor and define the dimensions of the stream in the options:
+
+```javascript
+// Setup the socket.io connection and start the player
+import io from 'socket.io-client';
+const socket = io( 'ws://example.com:8084/' );
+var player = new jsmpeg('socketIO', {canvas:canvas, width: 1280, height: 720});
+
+// receive binary data from socketIO and decode it
+socket.on('stream', (data) => {
+   player.decode(data);
+});
 ```
 
 ###Stream Recording###
