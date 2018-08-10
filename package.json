@@ -1,4 +1,12 @@
 {
   "name": "jsmpeg",
-  "main": "jsmpeg.js"
+  "version": "0.1.0",
+  "author": "Matthias Klan <matthias.klan@gmail.com> (http://github.com/matthiasklan)",
+  "description": "",
+  "main": "jsmpeg.js",
+  "license": "gpl-3.0",
+  "dependencies": {
+  },
+  "devDependencies": {
+  }
 }
